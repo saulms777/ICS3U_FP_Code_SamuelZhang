@@ -1,10 +1,9 @@
 import java.util.Random;
-import java.util.Arrays;
 
 public class Game {
 
     private int round = 0;
-    private int currentPlayer = 1;
+    private int currentPlayer = 0;
     private final Player[] players;
     private int[] dice = new int[5];
 
@@ -49,9 +48,9 @@ public class Game {
         }
     }
 
-    private boolean upper(String n) {
-        if (players[currentPlayer - 1].isCategoryEmpty(n)) {
-            players[currentPlayer - 1].update(dice, n, true);
+    private boolean upper(String same) {
+        if (players[currentPlayer].isCategoryEmpty(same)) {
+            players[currentPlayer].update(dice, same, true);
             return true;
         }
         return false;
@@ -61,7 +60,7 @@ public class Game {
         String category = n + "same";
         int[] count = new int[6];
         for (int num : dice) {
-            count[num - 1] += 1;
+            count[num - 1]++;
         }
         boolean isValid = false;
         for (int i = 0; i < 6; i++) {
@@ -70,8 +69,8 @@ public class Game {
                 break;
             }
         }
-        if (isValid && players[currentPlayer - 1].isCategoryEmpty(category)) {
-            players[currentPlayer - 1].update(dice, category, true);
+        if (isValid && players[currentPlayer].isCategoryEmpty(category)) {
+            players[currentPlayer].update(dice, category, true);
             return true;
         }
         return false;
@@ -87,26 +86,26 @@ public class Game {
         for (int i = 0; i < 6; i++) {
             if (count[i] == 2 && pair) {
                 pair = false;
-                isValid += 1;
+                isValid++;
             } else if (count[i] == 3) {
-                isValid += 1;
+                isValid++;
             }
         }
-        if (isValid == 2 && players[currentPlayer - 1].isCategoryEmpty("full")) {
-            players[currentPlayer - 1].update(dice, "full", true);
+        if (isValid == 2 && players[currentPlayer].isCategoryEmpty("full")) {
+            players[currentPlayer].update(dice, "full", true);
             return true;
         }
         return false;
     }
 
     private boolean straight(int length) {
-        Arrays.sort(dice);
+        dice = Utils.sortDice(dice);
         String category = "";
         boolean isValid = true;
         if (length == 4) {
             category = "small";
             for (int i = 0; i < 2; i++) {
-                for (int j = 0; j < 3; j++) {
+                for (int j = 0; j < 3 || isValid; j++) {        // test later
                     if (dice[i + j] + 1 != dice[i + j + 1]) {
                         isValid = false;
                         break;
@@ -122,8 +121,8 @@ public class Game {
                 }
             }
         }
-        if (isValid && players[currentPlayer - 1].isCategoryEmpty(category)) {
-            players[currentPlayer - 1].update(dice, category, true);
+        if (isValid && players[currentPlayer].isCategoryEmpty(category)) {
+            players[currentPlayer].update(dice, category, true);
             return true;
         }
         return false;
@@ -138,10 +137,10 @@ public class Game {
             }
         }
         if (isValid) {
-            if (players[currentPlayer - 1].isCategoryEmpty("chance")) {
-                players[currentPlayer - 1].update(dice, "chance", true);
+            if (players[currentPlayer].isCategoryEmpty("chance")) {
+                players[currentPlayer].update(dice, "chance", true);
             } else {
-                players[currentPlayer - 1].extraYahtzee();
+                players[currentPlayer].extraYahtzee();
                 // joker code here
             }
             return true;
@@ -150,8 +149,8 @@ public class Game {
     }
 
     private boolean chance() {
-        if (players[currentPlayer - 1].isCategoryEmpty("chance")) {
-            players[currentPlayer - 1].update(dice, "chance", true);
+        if (players[currentPlayer].isCategoryEmpty("chance")) {
+            players[currentPlayer].update(dice, "chance", true);
             return true;
         }
         return false;
