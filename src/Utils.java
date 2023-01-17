@@ -1,4 +1,4 @@
-public class Utils {
+public final class Utils {
 
     public static int[] initialArray(int length, int value) {
         int[] array = new int[length];
@@ -28,7 +28,9 @@ public class Utils {
     public static int arraySum(int[] array) {
         int sum = 0;
         for (int num : array) {
-            sum += num;
+            if (num != -1) {
+                sum += num;
+            }
         }
         return sum;
     }
@@ -47,6 +49,15 @@ public class Utils {
             }
         }
         return sorted;
+    }
+
+    public static boolean inArray(String str, String[] arr) {
+        for (String s : arr) {
+            if (str.equals(s)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -1,19 +1,61 @@
-import java.util.HashMap;
+import java.util.Map;
+import static java.util.Map.entry;
 
 public class Player {
 
-    private final int[] upperSection = Utils.initialArray(6, -1);
-    private final int[] lowerSection = Utils.initialArray(7, -1);
-    private int yahtzeeBonus = 0;
-    private final HashMap<String, Integer> categories = new HashMap<>() {{
-        put("3same", 0);
-        put("4same", 1);
-        put("full", 2);
-        put("small", 3);
-        put("large", 4);
-        put("yahtzee", 5);
-        put("chance", 6);
-    }};
+    private final int playerNum;
+    private int[] upperSection;
+    private int[] lowerSection;
+    private int yahtzeeBonus;
+    private final Map<String, Integer> categories;
+
+    public Player(int num) {
+        playerNum = num;
+        upperSection = Utils.initialArray(6, -1);
+        lowerSection = Utils.initialArray(7, -1);
+        yahtzeeBonus = 0;
+        categories = Map.ofEntries(
+                entry("3same", 0),
+                entry("4same", 1),
+                entry("full", 2),
+                entry("small", 3),
+                entry("large", 4),
+                entry("chance", 5),
+                entry("yahtzee", 6)
+        );
+    }
+
+    public int getPlayerNum() {
+        return playerNum;
+    }
+
+    public int[] getUpperSection() {
+        return upperSection;
+    }
+
+    public int getUpperTotal() {
+        int score = Utils.arraySum(upperSection);
+        if (score >= 63) {
+            score += 35;
+        }
+        return score;
+    }
+
+    public int[] getLowerSection() {
+        return lowerSection;
+    }
+
+    public int getLowerTotal() {
+        return Utils.arraySum(lowerSection) + yahtzeeBonus * 100;
+    }
+
+    public int getYahtzeeBonus() {
+        return yahtzeeBonus;
+    }
+
+    public int getTotalScore() {
+        return getUpperTotal() + getLowerTotal();
+    }
 
     public boolean isCategoryEmpty(String category) {
         switch (category) {
@@ -36,11 +78,11 @@ public class Player {
                 int index = categories.get(category);
                 if (valid) {
                     switch (index) {
-                        case 0, 1, 6 -> lowerSection[index] = Utils.arraySum(dice);
+                        case 0, 1, 5 -> lowerSection[index] = Utils.arraySum(dice);
                         case 2 -> lowerSection[2] = 25;
                         case 3 -> lowerSection[3] = 30;
                         case 4 -> lowerSection[4] = 40;
-                        case 5 -> lowerSection[5] = 50;
+                        case 6 -> lowerSection[5] = 50;
                     }
                 } else {
                     lowerSection[categories.get(category)] = 0;
@@ -51,16 +93,6 @@ public class Player {
 
     public void extraYahtzee() {
         yahtzeeBonus++;
-    }
-
-    public int calculateScore() {
-        int score = 0;
-        score += Utils.arraySum(upperSection);
-        if (score >= 63) {
-            score += 35;
-        }
-        score += Utils.arraySum(lowerSection) + yahtzeeBonus * 100;
-        return score;
     }
 
 }
