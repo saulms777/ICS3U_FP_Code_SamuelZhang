@@ -1,22 +1,30 @@
+// imports
 import java.util.Random;
 
 class Game {
 
+    // class variables
     private final GUI gui;
     private int round;
     private int currentPlayer;
     private int[] dice;
     private final Player[] players;
-    private final String[] categoryNames;
 
+    /**
+     * Main class for Yahtzee game.
+     */
     public Game() {
+        // setup start screen
         gui = new GUI();
         String start;
         do {
             start = buttonInput();
         } while (!start.equals("confirm"));
+
+        // run start screen
         gui.setupGameGUI();
 
+        // setup game variables
         round = 1;
         currentPlayer = 0;
         dice = new int[5];
@@ -25,105 +33,205 @@ class Game {
         for (int i = 0; i < numberOfPlayers; i++) {
             players[i] = new Player(i + 1);
         }
-        categoryNames = new String[]{
-                "1", "2", "3", "4", "5", "6",
-                "3same", "4same", "full", "small", "large", "chance", "yahtzee"
-        };
+
+        // run playable game
+        run();
     }
 
-    public void run() {
+    /**
+     * Main method of the playable part of the game. Iterates through each round, and run each turn in each round.
+     */
+    private void run() {
+        // iterate through 13 rounds
         while (round <= 13) {
+            // update GUI
             gui.setRoundNum(round);
+
+            // iterate through all players and run each turn
             while (currentPlayer < players.length) {
+                // update GUI
                 gui.changeDisplayedPlayer(players[currentPlayer]);
 
-                gui.showRerollButtons(2);
-                gui.setFeedbackText("Press to finalize dice");
-                rollDice(new boolean[]{true, true, true, true, true});
-                String[] diceNames = new String[]{"dice1", "dice2", "dice3", "dice4", "dice5"};
-                int timesRerolled = 0;
-                boolean[] selectedDice = new boolean[5];
-                String pressed;
-                do {
-                    pressed = buttonInput();
-                    for (int i = 0; i < 5; i++) {
-                        if (pressed.equals(diceNames[i])) {
-                            if (selectedDice[i]) {
-                                gui.unselectDice(i);
-                                selectedDice[i] = false;
-                            } else {
-                                gui.selectDice(i);
-                                selectedDice[i] = true;
-                            }
-                        }
-                    }
-                    if (pressed.equals("reroll")) {
-                        rollDice(selectedDice);
-                        selectedDice = new boolean[5];
-                        timesRerolled++;
-                        gui.showRerollButtons(2 - timesRerolled);
-                    }
-                } while (!pressed.equals("feedback") && timesRerolled < 2);
-                gui.hideRerollButtons();
+                // run player turn
+                runDice();
+                runCategorySelect();
 
-                boolean successful = true;
-                do {
-                    successful = chooseCategory(successful);
-                } while (!successful);
-                gui.changeDisplayedPlayer(players[currentPlayer]);
-
+                // wait for player to start next turn
                 if (currentPlayer != players.length - 1) {
-                    gui.setFeedbackText("Press for next player's turn");
-                    do {
-                        pressed = buttonInput();
-                    } while (!pressed.equals("feedback"));
+                    waitNext("Press for next player's turn");
+                    currentPlayer++;
                 }
-                currentPlayer++;
             }
-            gui.setFeedbackText("Press for next round");
-            String pressed;
-            do {
-                pressed = buttonInput();
-            } while (!pressed.equals("feedback"));
+
+            // wait for player to start next round
+            waitNext("Press for next round");
             currentPlayer = 0;
             round++;
         }
     }
 
+    /**
+     * Method for running the dice part of each turn. Rolls all dice first, then allows user to reroll the dice up to
+     * two times. The user can choose to stop rerolling at any time by pressing the feedback button.
+     */
+    private void runDice() {
+        // roll all dice
+        rollDice(new boolean[]{true, true, true, true, true});
+
+        // setup reroll functions
+        gui.showRerollButtons(2);
+        gui.setFeedbackText("Press to finalize dice");
+
+        // setup reroll variables
+        String[] diceNames = new String[]{"dice1", "dice2", "dice3", "dice4", "dice5"};
+        boolean[] selectedDice = new boolean[5];
+        int timesRerolled = 0;
+
+        // loop through until dice is finalized or dice rerolled 2 times
+        String pressed;
+        do {
+            // button input
+            pressed = buttonInput();
+
+            // if button clicked is a die select or unselect the die
+            for (int i = 0; i < 5; i++) {
+                if (pressed.equals(diceNames[i])) {
+                    if (selectedDice[i]) {
+                        gui.unselectDice(i);
+                        selectedDice[i] = false;
+                    } else {
+                        gui.selectDice(i);
+                        selectedDice[i] = true;
+                    }
+                }
+            }
+
+            // if button clicked is the reroll button reroll dice
+            if (pressed.equals("reroll")) {
+                rollDice(selectedDice);
+                selectedDice = new boolean[5];
+                timesRerolled++;
+                gui.showRerollButtons(2 - timesRerolled);
+            }
+        } while (!pressed.equals("feedback") && timesRerolled < 2);
+
+        // hide reroll functions
+        gui.hideRerollButtons();
+    }
+
+    /**
+     * Method for running the category select part of each turn. Allows the user to choose a category until an empty
+     * category is chosen. Update GUI after category is chosen.
+     */
+    private void runCategorySelect() {
+        // select category
+        boolean successful = true;
+        do {
+            updateCategoryText(successful);
+            checkYahtzee();
+            successful = chooseCategory();
+        } while (!successful);
+
+        // update GUI
+        gui.changeDisplayedPlayer(players[currentPlayer]);
+    }
+
+
+    /**
+     * Changes the text of the feedback text and waits for the feedback button to be pressed.
+     *
+     * @param text <code>String</code> to set feedback text to
+     */
+    private void waitNext(String text) {
+        // change feedback text
+        gui.setFeedbackText(text);
+
+        // wait for feedback button to be pressed
+        String pressed;
+        do {
+            pressed = buttonInput();
+        } while (!pressed.equals("feedback"));
+    }
+
+    /**
+     * Randomizes the dice based on an array of booleans to specify which die to roll. Updates the GUI dice display
+     * afterwards.
+     *
+     * @param selected Given <code>boolean</code> array
+     */
     private void rollDice(boolean[] selected) {
+        // randomize dice based on boolean array
         Random r = new Random();
         for (int i = 0; i < 5; i++) {
             if (selected[i]) {
                 dice[i] = 1 + r.nextInt(6);
             }
         }
+
+        // update GUI display for dice
         gui.displayDice(dice);
     }
 
+    /**
+     * Waits for a button input from the <code>GUI</code> class. Returns the <code>String</code> value of the button
+     * pressed.
+     *
+     * @return <code>String</code> name of pressed button
+     */
     private String buttonInput() {
+        // standby until a button is pressed
         while (gui.getPressed().equals("")) {
             System.out.print("");       // necessary lag for the code to work
         }
+
+        // return name of pressed button
         String pressed = gui.getPressed();
         gui.resetPressed();
         return pressed;
     }
 
-    private boolean chooseCategory(boolean repeat) {
+    /**
+     * Sets the text of the feedback button depending on the parameter <code>repeat</code>
+     *
+     * @param repeat If the category was already taken
+     */
+    private void updateCategoryText(boolean repeat) {
         if (repeat) {
             gui.setFeedbackText("Please choose a category");
         } else {
             gui.setFeedbackText("Please choose another category");
         }
+    }
 
+    /**
+     * Checks if the player is eligible for an extra yahtzee.
+     */
+    private void checkYahtzee() {
         if (isYahtzee() && !players[currentPlayer].isCategoryEmpty("yahtzee")) {
             players[currentPlayer].extraYahtzee();
         }
+    }
 
+    /**
+     * Allows the player to choose a category. Checks if the dice is valid for the chosen category and updates the
+     * player data. Returns a <code>boolean</code> based on whether the category was already taken or not.
+     *
+     * @return <code>true</code> if category was already filled <code>false</code>
+     */
+    private boolean chooseCategory() {
+        // names of all valid categories
+        String[] categoryNames = new String[]{
+                "1", "2", "3", "4", "5", "6",
+                "3same", "4same", "full", "small", "large", "chance", "yahtzee"
+        };
+
+        // choose category, repeat until a category is chosen
         String category;
         do {
             category = buttonInput();
         } while (!Utils.inArray(category, categoryNames));
+
+        // checks if the category chosen is valid for the dice rolled
         boolean isValid;
         switch (category) {
             case "3same" -> isValid = isSameDice(3);
@@ -134,6 +242,8 @@ class Game {
             case "yahtzee" -> isValid = isYahtzee();
             default -> isValid = true;
         }
+
+        // updates player data and returns boolean
         return updatePlayer(category, isValid);
     }
 
@@ -143,7 +253,7 @@ class Game {
      *
      * @param category Category to update
      * @param isValid Whether the category's requirements was met or not
-     * @return If the category was updated
+     * @return <code>true</code> if the category was updated else <code>false</code>
      */
     private boolean updatePlayer(String category, boolean isValid) {
         if (players[currentPlayer].isCategoryEmpty(category)) {
@@ -157,7 +267,7 @@ class Game {
      * Checks if dice has num of the same dice.
      *
      * @param num Number of the same dice
-     * @return If there are num of the same dice
+     * @return <code>true</code> if there are num of the same dice else <code>false</code>
      */
     private boolean isSameDice(int num) {
         // count occurrences of each number
@@ -178,7 +288,7 @@ class Game {
     /**
      * Checks if dice has a full house. A full house is when there is a triple and a pair in the same group of dice.
      *
-     * @return If there is a full house
+     * @return <code>true</code> if a full house is found else <code>false</code>
      */
     private boolean fullHouse() {
         // count occurrences of each number
@@ -215,7 +325,7 @@ class Game {
      * Checks if the dice has a straight of a specified length. A straight is a sequence of consecutive numbers.
      *
      * @param length Length of straight
-     * @return If straight exists
+     * @return <code>true</code> if straight exists else <code>false</code>
      */
     private boolean isStraight(int length) {
         // sort the dice
@@ -248,7 +358,7 @@ class Game {
     /**
      * Checks if the dice is a yahtzee or not. A yahtzee occurs when all dice are the same number.
      *
-     * @return If dice is a yahtzee
+     * @return <code>true</code> if dice is a yahtzee else <code>false</code>
      */
     private boolean isYahtzee() {
         // return false if any die is not equal to the first die

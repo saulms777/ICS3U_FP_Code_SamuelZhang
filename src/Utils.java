@@ -1,7 +1,7 @@
 final class Utils {
 
     /**
-     * Creates and returns an integer array of specified length with initial value -1.
+     * Creates and returns an <code>int</code> array of specified length with initial value -1.
      *
      * @param length Length of array
      * @return Created array
@@ -15,19 +15,19 @@ final class Utils {
     }
 
     /**
-     * Converts the first character of a given String to an integer value.
+     * Converts the first character of a given <code>String</code> to an <code>int</code> value.
      *
-     * @param str Given String
-     * @return Converted integer
+     * @param str Given <code>String</code>
+     * @return Converted <code>int</code>
      */
     static int parseInt(String str) {
         return (int) str.charAt(0) - 48;
     }
 
     /**
-     * Finds the number of times a given integer appears in a given array.
+     * Finds the number of times a given <code>int</code> appears in a given array.
      *
-     * @param array Given array
+     * @param array Given <code>int</code> array
      * @param num Number to find
      * @return Occurences of number in array
      */
@@ -60,7 +60,7 @@ final class Utils {
     /**
      * Sorts and returns an array using counting sort algorithm
      *
-     * @param array Given array
+     * @param array Given <code>int</code> array
      * @return Sorted array
      */
     static int[] sortDice(int[] array) {
@@ -86,11 +86,11 @@ final class Utils {
     }
 
     /**
-     * Checks if a given String is in a given array.
+     * Checks if a given <code>String</code> is in a given array.
      *
-     * @param str Given String
-     * @param arr Given array
-     * @return If the String is found in array
+     * @param str Specified <code>String</code>
+     * @param arr Given <code>String</code> array
+     * @return <code>true</code> if <code>String</code> is found in array else <code>false</code>
      */
     static boolean inArray(String str, String[] arr) {
         for (String s : arr) {
