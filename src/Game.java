@@ -1,19 +1,26 @@
 import java.util.Random;
 
-public class Game {
+class Game {
 
-    private GUI gui;
+    private final GUI gui;
     private int round;
     private int currentPlayer;
     private int[] dice;
-    private Player[] players;
+    private final Player[] players;
     private final String[] categoryNames;
 
-    public Game(int numberOfPlayers) {
+    public Game() {
         gui = new GUI();
+        String start;
+        do {
+            start = buttonInput();
+        } while (!start.equals("confirm"));
+        gui.setupGameGUI();
+
         round = 1;
         currentPlayer = 0;
         dice = new int[5];
+        int numberOfPlayers = gui.getNumberOfPlayers();
         players = new Player[numberOfPlayers];
         for (int i = 0; i < numberOfPlayers; i++) {
             players[i] = new Player(i + 1);
@@ -30,6 +37,7 @@ public class Game {
             while (currentPlayer < players.length) {
                 gui.changeDisplayedPlayer(players[currentPlayer]);
 
+                gui.showRerollButtons(2);
                 gui.setFeedbackText("Press to finalize dice");
                 rollDice(new boolean[]{true, true, true, true, true});
                 String[] diceNames = new String[]{"dice1", "dice2", "dice3", "dice4", "dice5"};
@@ -53,8 +61,10 @@ public class Game {
                         rollDice(selectedDice);
                         selectedDice = new boolean[5];
                         timesRerolled++;
+                        gui.showRerollButtons(2 - timesRerolled);
                     }
                 } while (!pressed.equals("feedback") && timesRerolled < 2);
+                gui.hideRerollButtons();
 
                 boolean successful = true;
                 do {
@@ -127,6 +137,14 @@ public class Game {
         return updatePlayer(category, isValid);
     }
 
+    /**
+     * Updates the current player's data based on the category chosen. Do not update if the category is already filled.
+     * Returns whether the category was filled or not.
+     *
+     * @param category Category to update
+     * @param isValid Whether the category's requirements was met or not
+     * @return If the category was updated
+     */
     private boolean updatePlayer(String category, boolean isValid) {
         if (players[currentPlayer].isCategoryEmpty(category)) {
             players[currentPlayer].update(dice, category, isValid);
