@@ -2,9 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Map;
-import static java.util.Map.entry;
 
-public class GUI {
+class GUI {
 
     // GUI elements
     private JFrame frame;
@@ -12,28 +11,82 @@ public class GUI {
     private JButton feedbackText;
     private String pressed;
 
+    // start screen
+    private int numberOfPlayers;
+    private JComboBox<String> numberOfPlayersSelection;
+    private JButton confirm;
+
     // left side of screen
     private Container leftSide;
     private JButton roundNum;
     private JButton playerNum;
-    private Container diceBoxes;
     private JButton[] dices;
     private JButton reroll;
+    private JButton rerollsLeft;
 
     // right side of screen
     private Container rightSide;
     private Container upperSection;
-    private Container upperCategories;
-    private final String[] upperCategoryInitialNames;
+    private String[] upperCategoryInitialNames;
     private JButton[] upperCategoryNames;
     private Container lowerSection;
-    private Container lowerCategories;
-    private final String[] lowerCategoryInitialNames;
+    private String[] lowerCategoryInitialNames;
     private JButton[] lowerCategoryNames;
     private JButton totalPoints;
 
     public GUI() {
         pressed = "";
+        setupStartGUI();
+        frame.setVisible(true);
+    }
+
+    private void setupStartGUI() {
+        frame = new JFrame();
+        frame.setSize(600, 350);
+        frame.setTitle("Yahtzee");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        screen = frame.getContentPane();
+        screen.setLayout(new BoxLayout(screen, BoxLayout.Y_AXIS));
+
+        screen.add(new JButton("Yahtzee"));
+
+        numberOfPlayersSelection = new JComboBox<>(new String[]{
+                "2", "3", "4",
+                "5", "6", "7",
+                "8", "9", "10"
+        });
+        numberOfPlayersSelection.setEditable(false);
+        numberOfPlayersSelection.setSelectedItem("2");
+        screen.add(numberOfPlayersSelection);
+
+        confirm = new JButton("Confirm");
+        screen.add(confirm);
+
+        setupStartActionListeners();
+    }
+
+    private void setupStartActionListeners() {
+        ActionListener buttonListener = ae -> {
+            numberOfPlayers = Utils.parseInt((String) numberOfPlayersSelection.getSelectedItem());
+
+            if (ae.getSource().equals(confirm)) {
+                pressed = "confirm";
+            }
+        };
+
+        numberOfPlayersSelection.addActionListener(buttonListener);
+        confirm.addActionListener(buttonListener);
+    }
+
+    int getNumberOfPlayers() {
+        return numberOfPlayers;
+    }
+
+    void setupGameGUI() {
+        screen.removeAll();
+        screen.repaint();
+
         dices = new JButton[5];
 
         upperCategoryInitialNames = new String[]{
@@ -56,19 +109,6 @@ public class GUI {
             lowerCategoryNames[i] = new JButton(lowerCategoryInitialNames[i]);
         }
 
-        setupGUI();
-        setupActionListeners();
-
-        frame.setVisible(true);
-    }
-
-    private void setupGUI() {
-        frame = new JFrame();
-        frame.setSize(600, 350);
-        frame.setTitle("Yahtzee");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        screen = frame.getContentPane();
         screen.setLayout(new FlowLayout());
         setupLeftGUI();
         screen.add(leftSide);
@@ -77,6 +117,8 @@ public class GUI {
 
         feedbackText = new JButton("");
         screen.add(feedbackText);
+
+        setupGameActionListeners();
     }
 
     private void setupLeftGUI() {
@@ -89,7 +131,7 @@ public class GUI {
         playerNum = new JButton("Player #1");
         leftSide.add(playerNum);
 
-        diceBoxes = new Container();
+        Container diceBoxes = new Container();
         diceBoxes.setLayout(new BoxLayout(diceBoxes, BoxLayout.Y_AXIS));
         for (int i = 0; i < 5; i++) {
             dices[i] = new JButton();
@@ -99,6 +141,8 @@ public class GUI {
 
         reroll = new JButton("Reroll Dice");
         leftSide.add(reroll);
+        rerollsLeft = new JButton("Rerolls Left: 2");
+        leftSide.add(rerollsLeft);
     }
 
     private void setupRightGUI() {
@@ -120,7 +164,7 @@ public class GUI {
         upperSection.setLayout(new BoxLayout(upperSection, BoxLayout.Y_AXIS));
         upperSection.add(new JButton("Upper Section"));
 
-        upperCategories = new Container();
+        Container upperCategories = new Container();
         upperCategories.setLayout(new GridLayout(3, 3));
         for (JButton category : upperCategoryNames) {
             upperCategories.add(category);
@@ -133,7 +177,7 @@ public class GUI {
         lowerSection.setLayout(new BoxLayout(lowerSection, BoxLayout.Y_AXIS));
         lowerSection.add(new JButton("Lower Section"));
 
-        lowerCategories = new Container();
+        Container lowerCategories = new Container();
         lowerCategories.setLayout(new GridLayout(3, 3));
         for (JButton category : lowerCategoryNames) {
             lowerCategories.add(category);
@@ -141,16 +185,16 @@ public class GUI {
         lowerSection.add(lowerCategories);
     }
 
-    private void setupActionListeners() {
+    private void setupGameActionListeners() {
         ActionListener buttonListener = ae -> {
             Map<Integer, String> pressedNames = Map.ofEntries(
-                    entry(0, "3same"),
-                    entry(1, "4same"),
-                    entry(2, "full"),
-                    entry(3, "small"),
-                    entry(4, "large"),
-                    entry(5, "chance"),
-                    entry(6, "yahtzee")
+                    Map.entry(0, "3same"),
+                    Map.entry(1, "4same"),
+                    Map.entry(2, "full"),
+                    Map.entry(3, "small"),
+                    Map.entry(4, "large"),
+                    Map.entry(5, "chance"),
+                    Map.entry(6, "yahtzee")
             );
 
             Object o = ae.getSource();
@@ -195,21 +239,13 @@ public class GUI {
         feedbackText.addActionListener(buttonListener);
     }
 
-    public String getPressed() {
-        return pressed;
-    }
-
-    public void resetPressed() {
-        pressed = "";
-    }
-
-    public void displayDice(int[] arr) {
+    void displayDice(int[] arr) {
         for (int i = 0; i < 5; i++) {
             dices[i].setText("" + arr[i]);
         }
     }
 
-    public void changeDisplayedPlayer(Player player) {
+    void changeDisplayedPlayer(Player player) {
         playerNum.setText("Player #" + player.getPlayerNum());
 
         int[] sectionData = player.getUpperSection();
@@ -241,21 +277,40 @@ public class GUI {
         totalPoints.setText("Total Points: " + player.getTotalScore());
     }
 
-    public void setRoundNum(int num) {
+    void showRerollButtons(int rerolls) {
+        leftSide.add(reroll);
+        rerollsLeft.setText("Rerolls Left: " + rerolls);
+        leftSide.add(rerollsLeft);
+    }
+
+    void hideRerollButtons() {
+        leftSide.remove(reroll);
+        leftSide.remove(rerollsLeft);
+    }
+
+    void setRoundNum(int num) {
         roundNum.setText("Round #" + num);
     }
 
-    public void selectDice(int num) {
+    String getPressed() {
+        return pressed;
+    }
+
+    void resetPressed() {
+        pressed = "";
+    }
+
+    void selectDice(int num) {
         String text = dices[num].getText();
         dices[num].setText(text + ": ✓");
     }
 
-    public void unselectDice(int num) {
+    void unselectDice(int num) {
         String text = dices[num].getText();
         dices[num].setText(text.replace(": ✓", ""));
     }
 
-    public void setFeedbackText(String text) {
+    void setFeedbackText(String text) {
         feedbackText.setText(text);
     }
 

@@ -1,39 +1,37 @@
 import java.util.Map;
-import static java.util.Map.entry;
 
-public class Player {
+class Player {
 
     private final int playerNum;
-    private int[] upperSection;
-    private int[] lowerSection;
+    private final int[] upperSection;
+    private final int[] lowerSection;
     private int yahtzeeBonus;
     private final Map<String, Integer> categories;
 
     public Player(int num) {
         playerNum = num;
-        upperSection = Utils.initialArray(6, -1);
-        lowerSection = Utils.initialArray(7, -1);
+        upperSection = Utils.initialArray(6);
+        lowerSection = Utils.initialArray(7);
         yahtzeeBonus = 0;
         categories = Map.ofEntries(
-                entry("3same", 0),
-                entry("4same", 1),
-                entry("full", 2),
-                entry("small", 3),
-                entry("large", 4),
-                entry("chance", 5),
-                entry("yahtzee", 6)
+                Map.entry("3same", 0),
+                Map.entry("4same", 1),
+                Map.entry("full", 2),
+                Map.entry("small", 3),
+                Map.entry("large", 4),
+                Map.entry("chance", 5),
+                Map.entry("yahtzee", 6)
         );
     }
-
-    public int getPlayerNum() {
+    int getPlayerNum() {
         return playerNum;
     }
 
-    public int[] getUpperSection() {
+    int[] getUpperSection() {
         return upperSection;
     }
 
-    public int getUpperTotal() {
+    int getUpperTotal() {
         int score = Utils.arraySum(upperSection);
         if (score >= 63) {
             score += 35;
@@ -41,23 +39,27 @@ public class Player {
         return score;
     }
 
-    public int[] getLowerSection() {
+    int[] getLowerSection() {
         return lowerSection;
     }
 
-    public int getLowerTotal() {
+    int getLowerTotal() {
         return Utils.arraySum(lowerSection) + yahtzeeBonus * 100;
     }
 
-    public int getYahtzeeBonus() {
+    int getYahtzeeBonus() {
         return yahtzeeBonus;
     }
 
-    public int getTotalScore() {
+    void extraYahtzee() {
+        yahtzeeBonus++;
+    }
+
+    int getTotalScore() {
         return getUpperTotal() + getLowerTotal();
     }
 
-    public boolean isCategoryEmpty(String category) {
+    boolean isCategoryEmpty(String category) {
         switch (category) {
             case "1", "2", "3", "4", "5", "6" -> {
                 return upperSection[Utils.parseInt(category) - 1] == -1;
@@ -68,7 +70,7 @@ public class Player {
         }
     }
 
-    public void update(int[] dice, String category, boolean valid) {
+    void update(int[] dice, String category, boolean valid) {
         switch (category) {
             case "1", "2", "3", "4", "5", "6" -> {
                 int num = Utils.parseInt(category);
@@ -89,10 +91,6 @@ public class Player {
                 }
             }
         }
-    }
-
-    public void extraYahtzee() {
-        yahtzeeBonus++;
     }
 
 }
