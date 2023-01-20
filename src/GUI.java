@@ -7,6 +7,7 @@ class GUI {
     // GUI elements
     private JFrame frame;
     private Container screen;
+    private Container middlePart;
     private JButton feedbackText;
     private String pressed;
 
@@ -15,15 +16,18 @@ class GUI {
     private JComboBox<String> numberOfPlayersSelection;
     private JButton confirm;
 
-    // left side of screen
-    private Container leftSide;
+    // upper part of screen
+    private Container upperPart;
     private JButton roundNum;
     private JButton playerNum;
+
+    // left side of middle
+    private Container leftSide;
     private JButton[] dices;
     private JButton reroll;
     private JButton rerollsLeft;
 
-    // right side of screen
+    // right side of middle
     private Container rightSide;
     private Container singlesSection;
     private String[] singlesCategoryInitialNames;
@@ -41,15 +45,26 @@ class GUI {
 
     private void setupStartGUI() {
         frame = new JFrame();
-        frame.setSize(600, 350);
+        frame.setSize(270, 190);
         frame.setTitle("Jackpot");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setResizable(false);
 
         screen = frame.getContentPane();
         screen.setLayout(new BoxLayout(screen, BoxLayout.Y_AXIS));
 
-        screen.add(new JButton("Jackpot"));
+        screen.add(Box.createVerticalStrut(10));
 
+        JButton title = new JButton("Jackpot");
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        screen.add(title);
+
+        screen.add(Box.createVerticalStrut(40));
+
+        Container centre = new Container();
+        centre.setLayout(new FlowLayout());
+
+        centre.add(new JButton("Number of players:"));
         numberOfPlayersSelection = new JComboBox<>(new String[]{
                 "2", "3", "4",
                 "5", "6", "7",
@@ -57,10 +72,14 @@ class GUI {
         });
         numberOfPlayersSelection.setEditable(false);
         numberOfPlayersSelection.setSelectedItem("2");
-        screen.add(numberOfPlayersSelection);
+        centre.add(numberOfPlayersSelection);
+        screen.add(centre);
 
         confirm = new JButton("Confirm");
+        confirm.setAlignmentX(Component.CENTER_ALIGNMENT);
         screen.add(confirm);
+
+        screen.add(Box.createVerticalStrut(10));
 
         setupStartActionListeners();
     }
@@ -83,6 +102,7 @@ class GUI {
     }
 
     void setupGameGUI() {
+        frame.setSize(600, 410);
         screen.removeAll();
         screen.repaint();
 
@@ -108,39 +128,70 @@ class GUI {
             combosCategoryNames[i] = new JButton(combosCategoryInitialNames[i]);
         }
 
-        screen.setLayout(new FlowLayout());
-        setupLeftGUI();
-        screen.add(leftSide);
-        setupRightGUI();
-        screen.add(rightSide);
+        screen.setLayout(new BoxLayout(screen, BoxLayout.Y_AXIS));
+
+        screen.add(Box.createVerticalStrut(10));
+
+        setupUpperGUI();
+        screen.add(upperPart);
 
         feedbackText = new JButton("");
+        feedbackText.setAlignmentX(Component.CENTER_ALIGNMENT);
         screen.add(feedbackText);
 
+        screen.add(Box.createVerticalStrut(10));
+
+        setupMiddleGUI();
+        screen.add(middlePart);
+
         setupGameActionListeners();
+    }
+
+    private void setupUpperGUI() {
+        upperPart = new Container();
+        upperPart.setLayout(new FlowLayout());
+
+        roundNum = new JButton("Round #1");
+        roundNum.setAlignmentX(Component.CENTER_ALIGNMENT);
+        upperPart.add(roundNum);
+
+        upperPart.add(Box.createHorizontalStrut(10));
+
+        playerNum = new JButton("Player #1");
+        playerNum.setAlignmentX(Component.CENTER_ALIGNMENT);
+        upperPart.add(playerNum);
+    }
+
+    private void setupMiddleGUI() {
+        middlePart = new Container();
+        middlePart.setLayout(new FlowLayout());
+        setupLeftGUI();
+        middlePart.add(leftSide);
+        middlePart.add(Box.createHorizontalStrut(20));
+        setupRightGUI();
+        middlePart.add(rightSide);
     }
 
     private void setupLeftGUI() {
         leftSide = new Container();
         leftSide.setLayout(new BoxLayout(leftSide, BoxLayout.Y_AXIS));
 
-        roundNum = new JButton("Round #1");
-        leftSide.add(roundNum);
-
-        playerNum = new JButton("Player #1");
-        leftSide.add(playerNum);
-
         Container diceBoxes = new Container();
         diceBoxes.setLayout(new BoxLayout(diceBoxes, BoxLayout.Y_AXIS));
         for (int i = 0; i < 5; i++) {
             dices[i] = new JButton();
+            dices[i].setAlignmentX(Component.CENTER_ALIGNMENT);
             diceBoxes.add(dices[i]);
         }
         leftSide.add(diceBoxes);
 
+        leftSide.add(Box.createVerticalStrut(10));
+
         reroll = new JButton("Reroll Dice");
+        reroll.setAlignmentX(Component.CENTER_ALIGNMENT);
         leftSide.add(reroll);
         rerollsLeft = new JButton("Rerolls Left: 2");
+        rerollsLeft.setAlignmentX(Component.CENTER_ALIGNMENT);
         leftSide.add(rerollsLeft);
     }
 
@@ -155,13 +206,17 @@ class GUI {
         rightSide.add(combosSection);
 
         totalMoney = new JButton("Total Money: $0");
+        totalMoney.setAlignmentX(Component.CENTER_ALIGNMENT);
         rightSide.add(totalMoney);
     }
 
     private void setupSinglesSection() {
         singlesSection = new Container();
         singlesSection.setLayout(new BoxLayout(singlesSection, BoxLayout.Y_AXIS));
-        singlesSection.add(new JButton("Singles"));
+
+        JButton singles = new JButton("Singles");
+        singles.setAlignmentX(Component.CENTER_ALIGNMENT);
+        singlesSection.add(singles);
 
         Container singlesCategories = new Container();
         singlesCategories.setLayout(new GridLayout(3, 3));
@@ -169,12 +224,17 @@ class GUI {
             singlesCategories.add(category);
         }
         singlesSection.add(singlesCategories);
+
+        singlesSection.add(Box.createVerticalStrut(10));
     }
 
     private void setupCombosSection() {
         combosSection = new Container();
         combosSection.setLayout(new BoxLayout(combosSection, BoxLayout.Y_AXIS));
-        combosSection.add(new JButton("Combos"));
+
+        JButton singles = new JButton("Combos");
+        singles.setAlignmentX(Component.CENTER_ALIGNMENT);
+        singlesSection.add(singles);
 
         Container combosCategories = new Container();
         combosCategories.setLayout(new GridLayout(3, 3));
@@ -182,11 +242,13 @@ class GUI {
             combosCategories.add(category);
         }
         combosSection.add(combosCategories);
+
+        combosSection.add(Box.createVerticalStrut(10));
     }
 
     private void setupGameActionListeners() {
-        ActionListener buttonListener = ae -> {
-            Object o = ae.getSource();
+        ActionListener buttonListener = e -> {
+            Object o = e.getSource();
 
             for (int i = 0; i < 5; i++) {
                 if (dices[i].equals(o)) {
