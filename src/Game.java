@@ -11,7 +11,7 @@ class Game {
     private final Player[] players;
 
     /**
-     * Main class for Yahtzee game.
+     * Main class for jackpot game.
      */
     public Game() {
         // setup start screen
@@ -128,14 +128,13 @@ class Game {
         boolean successful = true;
         do {
             updateCategoryText(successful);
-            checkYahtzee();
+            checkJackpot();
             successful = chooseCategory();
         } while (!successful);
 
         // update GUI
         gui.changeDisplayedPlayer(players[currentPlayer]);
     }
-
 
     /**
      * Changes the text of the feedback text and waits for the feedback button to be pressed.
@@ -204,11 +203,11 @@ class Game {
     }
 
     /**
-     * Checks if the player is eligible for an extra yahtzee.
+     * Checks if the player is eligible for an extra jackpot.
      */
-    private void checkYahtzee() {
-        if (isYahtzee() && !players[currentPlayer].isCategoryEmpty("yahtzee")) {
-            players[currentPlayer].extraYahtzee();
+    private void checkJackpot() {
+        if (isJackpot() && !players[currentPlayer].isCategoryEmpty("jackpot")) {
+            players[currentPlayer].addExtraJackpot();
         }
     }
 
@@ -222,7 +221,7 @@ class Game {
         // names of all valid categories
         String[] categoryNames = new String[]{
                 "1", "2", "3", "4", "5", "6",
-                "3same", "4same", "full", "small", "large", "chance", "yahtzee"
+                "triple", "quad", "special", "four", "five", "chance", "jackpot"
         };
 
         // choose category, repeat until a category is chosen
@@ -233,15 +232,15 @@ class Game {
 
         // checks if the category chosen is valid for the dice rolled
         boolean isValid;
-        switch (category) {
-            case "3same" -> isValid = isSameDice(3);
-            case "4same" -> isValid = isSameDice(4);
-            case "full" -> isValid = fullHouse();
-            case "small" -> isValid = isStraight(4);
-            case "large" -> isValid = isStraight(5);
-            case "yahtzee" -> isValid = isYahtzee();
-            default -> isValid = true;
-        }
+        isValid = switch (category) {
+            case "triple" -> isSameDice(3);
+            case "quad" -> isSameDice(4);
+            case "special" -> isSpecial();
+            case "four" -> isStraight(4);
+            case "five" -> isStraight(5);
+            case "jackpot" -> isJackpot();
+            default -> true;
+        };
 
         // updates player data and returns boolean
         return updatePlayer(category, isValid);
@@ -286,27 +285,27 @@ class Game {
     }
 
     /**
-     * Checks if dice has a full house. A full house is when there is a triple and a pair in the same group of dice.
+     * Checks if dice has a special. A special is when there is a triple and a pair in the same group of dice.
      *
-     * @return <code>true</code> if a full house is found else <code>false</code>
+     * @return <code>true</code> if a special is found else <code>false</code>
      */
-    private boolean fullHouse() {
+    private boolean isSpecial() {
         // count occurrences of each number
         int[] count = new int[6];
         for (int num : dice) {
             count[num - 1]++;
         }
 
-        // return true if the dice is a yahtzee
-        if (isYahtzee()) {
+        // return true if the dice is a Jackpot
+        if (isJackpot()) {
             return true;
         }
 
         /*
          * Iterates through the count of each number and checks if there is a pair or a triple. If there is a triple,
          * increment the variable isValid by one. If there is a pair and no other pairs have been found, then increment
-         * the variable isValid by one. After all iterations, if the variable isValid is two, then a full house has
-         * been found.
+         * the variable isValid by one. After all iterations, if the variable isValid is two, then a special has been
+         * found.
          */
         int isValid = 0;
         boolean pair = true;
@@ -356,11 +355,11 @@ class Game {
     }
 
     /**
-     * Checks if the dice is a yahtzee or not. A yahtzee occurs when all dice are the same number.
+     * Checks if the dice is a jackpot or not. A jackpot occurs when all dice are the same number.
      *
-     * @return <code>true</code> if dice is a yahtzee else <code>false</code>
+     * @return <code>true</code> if dice is a jackpot else <code>false</code>
      */
-    private boolean isYahtzee() {
+    private boolean isJackpot() {
         // return false if any die is not equal to the first die
         for (int num : dice) {
             if (num != dice[0]) {

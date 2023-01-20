@@ -1,7 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Map;
 
 class GUI {
 
@@ -26,13 +25,13 @@ class GUI {
 
     // right side of screen
     private Container rightSide;
-    private Container upperSection;
-    private String[] upperCategoryInitialNames;
-    private JButton[] upperCategoryNames;
-    private Container lowerSection;
-    private String[] lowerCategoryInitialNames;
-    private JButton[] lowerCategoryNames;
-    private JButton totalPoints;
+    private Container singlesSection;
+    private String[] singlesCategoryInitialNames;
+    private JButton[] singlesCategoryNames;
+    private Container combosSection;
+    private String[] combosCategoryInitialNames;
+    private JButton[] combosCategoryNames;
+    private JButton totalMoney;
 
     public GUI() {
         pressed = "";
@@ -43,13 +42,13 @@ class GUI {
     private void setupStartGUI() {
         frame = new JFrame();
         frame.setSize(600, 350);
-        frame.setTitle("Yahtzee");
+        frame.setTitle("Jackpot");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         screen = frame.getContentPane();
         screen.setLayout(new BoxLayout(screen, BoxLayout.Y_AXIS));
 
-        screen.add(new JButton("Yahtzee"));
+        screen.add(new JButton("Jackpot"));
 
         numberOfPlayersSelection = new JComboBox<>(new String[]{
                 "2", "3", "4",
@@ -89,24 +88,24 @@ class GUI {
 
         dices = new JButton[5];
 
-        upperCategoryInitialNames = new String[]{
-                "Aces", "Twos", "Threes",
+        singlesCategoryInitialNames = new String[]{
+                "Ones", "Twos", "Threes",
                 "Fours", "Fives", "Sixes",
-                "Bonus: x", "", "Upper Total: 0"
+                "Bonus: x", "", "Singles Total: 0"
         };
-        upperCategoryNames = new JButton[9];
+        singlesCategoryNames = new JButton[9];
         for (int i = 0; i < 9; i++) {
-            upperCategoryNames[i] = new JButton(upperCategoryInitialNames[i]);
+            singlesCategoryNames[i] = new JButton(singlesCategoryInitialNames[i]);
         }
 
-        lowerCategoryInitialNames = new String[]{
-                "3 of a Kind", "4 of a Kind", "Full House",
-                "Small Straight", "Large Straight", "Chance",
-                "Yahtzee", "Yahtzee Bonus: 0", "Lower Total: 0"
+        combosCategoryInitialNames = new String[]{
+                "Triple", "Quad", "Special",
+                "Four-Line", "Five-Line", "Chance",
+                "Jackpot", "Jackpot Bonus: 0", "Combos Total: 0"
         };
-        lowerCategoryNames = new JButton[9];
+        combosCategoryNames = new JButton[9];
         for (int i = 0; i < 9; i++) {
-            lowerCategoryNames[i] = new JButton(lowerCategoryInitialNames[i]);
+            combosCategoryNames[i] = new JButton(combosCategoryInitialNames[i]);
         }
 
         screen.setLayout(new FlowLayout());
@@ -149,54 +148,44 @@ class GUI {
         rightSide = new Container();
         rightSide.setLayout(new BoxLayout(rightSide, BoxLayout.Y_AXIS));
 
-        setupUpperSection();
-        rightSide.add(upperSection);
+        setupSinglesSection();
+        rightSide.add(singlesSection);
 
-        setupLowerSection();
-        rightSide.add(lowerSection);
+        setupCombosSection();
+        rightSide.add(combosSection);
 
-        totalPoints = new JButton("Total points: 0");
-        rightSide.add(totalPoints);
+        totalMoney = new JButton("Total Money: $0");
+        rightSide.add(totalMoney);
     }
 
-    private void setupUpperSection() {
-        upperSection = new Container();
-        upperSection.setLayout(new BoxLayout(upperSection, BoxLayout.Y_AXIS));
-        upperSection.add(new JButton("Upper Section"));
+    private void setupSinglesSection() {
+        singlesSection = new Container();
+        singlesSection.setLayout(new BoxLayout(singlesSection, BoxLayout.Y_AXIS));
+        singlesSection.add(new JButton("Singles"));
 
-        Container upperCategories = new Container();
-        upperCategories.setLayout(new GridLayout(3, 3));
-        for (JButton category : upperCategoryNames) {
-            upperCategories.add(category);
+        Container singlesCategories = new Container();
+        singlesCategories.setLayout(new GridLayout(3, 3));
+        for (JButton category : singlesCategoryNames) {
+            singlesCategories.add(category);
         }
-        upperSection.add(upperCategories);
+        singlesSection.add(singlesCategories);
     }
 
-    private void setupLowerSection() {
-        lowerSection = new Container();
-        lowerSection.setLayout(new BoxLayout(lowerSection, BoxLayout.Y_AXIS));
-        lowerSection.add(new JButton("Lower Section"));
+    private void setupCombosSection() {
+        combosSection = new Container();
+        combosSection.setLayout(new BoxLayout(combosSection, BoxLayout.Y_AXIS));
+        combosSection.add(new JButton("Combos"));
 
-        Container lowerCategories = new Container();
-        lowerCategories.setLayout(new GridLayout(3, 3));
-        for (JButton category : lowerCategoryNames) {
-            lowerCategories.add(category);
+        Container combosCategories = new Container();
+        combosCategories.setLayout(new GridLayout(3, 3));
+        for (JButton category : combosCategoryNames) {
+            combosCategories.add(category);
         }
-        lowerSection.add(lowerCategories);
+        combosSection.add(combosCategories);
     }
 
     private void setupGameActionListeners() {
         ActionListener buttonListener = ae -> {
-            Map<Integer, String> pressedNames = Map.ofEntries(
-                    Map.entry(0, "3same"),
-                    Map.entry(1, "4same"),
-                    Map.entry(2, "full"),
-                    Map.entry(3, "small"),
-                    Map.entry(4, "large"),
-                    Map.entry(5, "chance"),
-                    Map.entry(6, "yahtzee")
-            );
-
             Object o = ae.getSource();
 
             for (int i = 0; i < 5; i++) {
@@ -210,14 +199,23 @@ class GUI {
             }
 
             for (int i = 0; i < 6; i++) {
-                if (upperCategoryNames[i].equals(o)) {
+                if (singlesCategoryNames[i].equals(o)) {
                     pressed = "" + (i + 1);
                 }
             }
 
             for (int i = 0; i < 7; i++) {
-                if (lowerCategoryNames[i].equals(o)) {
-                    pressed = pressedNames.get(i);
+                if (combosCategoryNames[i].equals(o)) {
+                    pressed = switch (i) {
+                        case 0 -> "triple";
+                        case 1 -> "quad";
+                        case 2 -> "special";
+                        case 3 -> "four";
+                        case 4 -> "five";
+                        case 5 -> "chance";
+                        case 6 -> "jackpot";
+                        default -> "";
+                    };
                 }
             }
 
@@ -231,10 +229,10 @@ class GUI {
         }
         reroll.addActionListener(buttonListener);
         for (int i = 0; i < 6; i++) {
-            upperCategoryNames[i].addActionListener(buttonListener);
+            singlesCategoryNames[i].addActionListener(buttonListener);
         }
         for (int i = 0; i < 7; i++) {
-            lowerCategoryNames[i].addActionListener(buttonListener);
+            combosCategoryNames[i].addActionListener(buttonListener);
         }
         feedbackText.addActionListener(buttonListener);
     }
@@ -248,33 +246,33 @@ class GUI {
     void changeDisplayedPlayer(Player player) {
         playerNum.setText("Player #" + player.getPlayerNum());
 
-        int[] sectionData = player.getUpperSection();
+        int[] sectionData = player.getSingles();
         for (int i = 0; i < 6; i++) {
-            String currentText = upperCategoryInitialNames[i];
+            String currentText = singlesCategoryInitialNames[i];
             if (sectionData[i] == -1) {
-                upperCategoryNames[i].setText(currentText);
+                singlesCategoryNames[i].setText(currentText);
             } else {
-                upperCategoryNames[i].setText(currentText + ": " + sectionData[i]);
+                singlesCategoryNames[i].setText(currentText + ": $" + sectionData[i]);
             }
         }
         if (Utils.arraySum(sectionData) >= 63) {
-            upperCategoryNames[6].setText("Bonus: ✓");
+            singlesCategoryNames[6].setText("Bonus: ✓");
         }
-        upperCategoryNames[8].setText("Upper Total: " + player.getUpperTotal());
+        singlesCategoryNames[8].setText("Singles Total: " + player.getSinglesTotal());
 
-        sectionData = player.getLowerSection();
+        sectionData = player.getCombos();
         for (int i = 0; i < 7; i++) {
-            String currentText = lowerCategoryInitialNames[i];
+            String currentText = combosCategoryInitialNames[i];
             if (sectionData[i] == -1) {
-                lowerCategoryNames[i].setText(currentText);
+                combosCategoryNames[i].setText(currentText);
             } else {
-                lowerCategoryNames[i].setText(currentText + ": " + sectionData[i]);
+                combosCategoryNames[i].setText(currentText + ": $" + sectionData[i]);
             }
         }
-        lowerCategoryNames[7].setText("Yahtzee Bonus: " + player.getYahtzeeBonus() * 100);
-        lowerCategoryNames[8].setText("Lower Total: " + player.getLowerTotal());
+        combosCategoryNames[7].setText("Jackpot Bonus: " + player.getJackpotBonus() * 100);
+        combosCategoryNames[8].setText("Combos Total: " + player.getCombosTotal());
 
-        totalPoints.setText("Total Points: " + player.getTotalScore());
+        totalMoney.setText("Total Money: $" + player.getTotalScore());
     }
 
     void showRerollButtons(int rerolls) {
