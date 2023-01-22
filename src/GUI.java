@@ -41,7 +41,7 @@ class GUI {
 
     private void setupStartGUI() {
         frame = new JFrame();
-        frame.setSize(270, 190);
+        frame.setSize(800, 780);
         frame.setTitle("Jackpot");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
@@ -52,15 +52,59 @@ class GUI {
         screen.add(Box.createVerticalStrut(10));
 
         JButton title = new JButton("Jackpot");
+        title.setFont(new Font(title.getFont().getFontName(), Font.BOLD, 16));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         screen.add(title);
 
         screen.add(Box.createVerticalStrut(40));
 
-        Container centre = new Container();
-        centre.setLayout(new FlowLayout());
+        JButton instructions = new JButton(
+                        """
+                        <html><pre>
+                        Jackpot is a dice game played with five dice. The goal is to earn the most money by rolling
+                        certain combinations of the dice.
+                        
+                        To play, each player takes turns rolling the dice. On the first roll, the player will roll all
+                        five dice. After the first roll, the player can choose to roll some or all of the dice again in
+                        order to try and get a better combination. The player has a total of three rolls per turn.
+                        
+                        After the third roll, the player must choose one of the thirteen categories to calculate the
+                        amount of money earned. The categories include ones, twos, threes, fours, fives, sixes, triple,
+                        quad, special, four-line, five-line, chance, and Jackpot.
+                        
+                        The game ends after thirteen rounds. The player with the most money wins.
+                        
+                        The following are the rules for each category:
+                         Category                    | Requirements             | Money earned
+                        -----------------------------|--------------------------|----------------------
+                         All singles categories      | None                     | Sum of matching dice
+                         Triple                      | Three of a kind          | Sum of all dice
+                         Quad                        | Four of a kind           | Sum of all dice
+                         Special                     | A triple and a pair      | $25
+                         Four-line                   | Four consecutive dice    | $30
+                         Five-line                   | Five consecutive dice    | $40
+                         Chance                      | None                     | Sum of all dice
+                         Jackpot                     | Five of a kind           | $50
+                        
+                        Extra scoring rules:
+                         - If the player has more than $50 from the singles categories, they will recieve another $25.
+                         - If a Jackpot is rolled while the Jackpot category is already used, the player will be awarded
+                           an extra $100. Category selection continues as normal.
+                        
+                        Select a number of players and press "Confirm" to start.
+                        </pre></html>
+                        """
+        );
+        instructions.setAlignmentX(Component.CENTER_ALIGNMENT);
+        instructions.setMaximumSize(new Dimension(700, 600));
+        screen.add(instructions);
 
-        centre.add(new JButton("Number of players:"));
+        screen.add(Box.createVerticalStrut(40));
+
+        Container selectPlayerNum = new Container();
+        selectPlayerNum.setLayout(new FlowLayout());
+
+        selectPlayerNum.add(new JButton("Number of players:"));
         JComboBox<String> numberOfPlayersSelection = new JComboBox<>(new String[]{
                 "2", "3", "4",
                 "5", "6", "7",
@@ -68,18 +112,16 @@ class GUI {
         });
         numberOfPlayersSelection.setEditable(false);
         numberOfPlayersSelection.setSelectedItem("2");
-        centre.add(numberOfPlayersSelection);
-        screen.add(centre);
+        selectPlayerNum.add(numberOfPlayersSelection);
+        screen.add(selectPlayerNum);
 
         JButton confirm = new JButton("Confirm");
         confirm.setAlignmentX(Component.CENTER_ALIGNMENT);
         screen.add(confirm);
 
         confirm.addActionListener(e -> {
-            if (e.getSource().equals(confirm)) {
-                numberOfPlayers = Utils.parseInt((String) numberOfPlayersSelection.getSelectedItem());
-                pressed = "confirm";
-            }
+            numberOfPlayers = Utils.parseInt((String) numberOfPlayersSelection.getSelectedItem());
+            pressed = "confirm";
         });
 
         screen.add(Box.createVerticalStrut(10));
@@ -401,11 +443,7 @@ class GUI {
 
         screen.add(Box.createVerticalStrut(10));
 
-        end.addActionListener(e -> {
-            if (e.getSource().equals(end)) {
-                frame.dispose();
-            }
-        });
+        end.addActionListener(e -> frame.dispose());
 
         screen.revalidate();
     }

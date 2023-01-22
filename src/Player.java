@@ -56,8 +56,8 @@ class Player {
      */
     int getSinglesTotal() {
         int score = Utils.arraySum(singles);
-        if (score >= 63) {
-            score += 35;
+        if (score >= 50) {
+            score += 25;
         }
         return score;
     }
