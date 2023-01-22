@@ -10,18 +10,14 @@ class GUI {
     private Container middlePart;
     private JButton feedbackText;
     private String pressed;
-
-    // start screen
     private int numberOfPlayers;
-    private JComboBox<String> numberOfPlayersSelection;
-    private JButton confirm;
 
     // upper part of screen
     private Container upperPart;
     private JButton roundNum;
     private JButton playerNum;
 
-    // left side of middle
+    // left side of middle part
     private Container leftSide;
     private JButton[] dices;
     private JButton reroll;
@@ -30,11 +26,11 @@ class GUI {
     // right side of middle
     private Container rightSide;
     private Container singlesSection;
-    private String[] singlesCategoryInitialNames;
-    private JButton[] singlesCategoryNames;
+    private String[] singlesCategoryNames;
+    private JButton[] singlesCategoryButtons;
     private Container combosSection;
-    private String[] combosCategoryInitialNames;
-    private JButton[] combosCategoryNames;
+    private String[] combosCategoryNames;
+    private JButton[] combosCategoryButtons;
     private JButton totalMoney;
 
     public GUI() {
@@ -65,36 +61,30 @@ class GUI {
         centre.setLayout(new FlowLayout());
 
         centre.add(new JButton("Number of players:"));
-        numberOfPlayersSelection = new JComboBox<>(new String[]{
+        JComboBox<String> numberOfPlayersSelection = new JComboBox<>(new String[]{
                 "2", "3", "4",
                 "5", "6", "7",
-                "8", "9", "10"
+                "8", "9"
         });
         numberOfPlayersSelection.setEditable(false);
         numberOfPlayersSelection.setSelectedItem("2");
         centre.add(numberOfPlayersSelection);
         screen.add(centre);
 
-        confirm = new JButton("Confirm");
+        JButton confirm = new JButton("Confirm");
         confirm.setAlignmentX(Component.CENTER_ALIGNMENT);
         screen.add(confirm);
 
-        screen.add(Box.createVerticalStrut(10));
-
-        setupStartActionListeners();
-    }
-
-    private void setupStartActionListeners() {
-        ActionListener buttonListener = ae -> {
-            numberOfPlayers = Utils.parseInt((String) numberOfPlayersSelection.getSelectedItem());
-
-            if (ae.getSource().equals(confirm)) {
+        confirm.addActionListener(e -> {
+            if (e.getSource().equals(confirm)) {
+                numberOfPlayers = Utils.parseInt((String) numberOfPlayersSelection.getSelectedItem());
                 pressed = "confirm";
             }
-        };
+        });
 
-        numberOfPlayersSelection.addActionListener(buttonListener);
-        confirm.addActionListener(buttonListener);
+        screen.add(Box.createVerticalStrut(10));
+
+        screen.revalidate();
     }
 
     int getNumberOfPlayers() {
@@ -108,24 +98,24 @@ class GUI {
 
         dices = new JButton[5];
 
-        singlesCategoryInitialNames = new String[]{
+        singlesCategoryNames = new String[]{
                 "Ones", "Twos", "Threes",
                 "Fours", "Fives", "Sixes",
                 "Bonus: x", "", "Singles Total: 0"
         };
-        singlesCategoryNames = new JButton[9];
+        singlesCategoryButtons = new JButton[9];
         for (int i = 0; i < 9; i++) {
-            singlesCategoryNames[i] = new JButton(singlesCategoryInitialNames[i]);
+            singlesCategoryButtons[i] = new JButton(singlesCategoryNames[i]);
         }
 
-        combosCategoryInitialNames = new String[]{
+        combosCategoryNames = new String[]{
                 "Triple", "Quad", "Special",
                 "Four-Line", "Five-Line", "Chance",
                 "Jackpot", "Jackpot Bonus: 0", "Combos Total: 0"
         };
-        combosCategoryNames = new JButton[9];
+        combosCategoryButtons = new JButton[9];
         for (int i = 0; i < 9; i++) {
-            combosCategoryNames[i] = new JButton(combosCategoryInitialNames[i]);
+            combosCategoryButtons[i] = new JButton(combosCategoryNames[i]);
         }
 
         screen.setLayout(new BoxLayout(screen, BoxLayout.Y_AXIS));
@@ -145,6 +135,8 @@ class GUI {
         screen.add(middlePart);
 
         setupGameActionListeners();
+
+        screen.revalidate();
     }
 
     private void setupUpperGUI() {
@@ -220,7 +212,7 @@ class GUI {
 
         Container singlesCategories = new Container();
         singlesCategories.setLayout(new GridLayout(3, 3));
-        for (JButton category : singlesCategoryNames) {
+        for (JButton category : singlesCategoryButtons) {
             singlesCategories.add(category);
         }
         singlesSection.add(singlesCategories);
@@ -238,7 +230,7 @@ class GUI {
 
         Container combosCategories = new Container();
         combosCategories.setLayout(new GridLayout(3, 3));
-        for (JButton category : combosCategoryNames) {
+        for (JButton category : combosCategoryButtons) {
             combosCategories.add(category);
         }
         combosSection.add(combosCategories);
@@ -261,13 +253,13 @@ class GUI {
             }
 
             for (int i = 0; i < 6; i++) {
-                if (singlesCategoryNames[i].equals(o)) {
+                if (singlesCategoryButtons[i].equals(o)) {
                     pressed = "" + (i + 1);
                 }
             }
 
             for (int i = 0; i < 7; i++) {
-                if (combosCategoryNames[i].equals(o)) {
+                if (combosCategoryButtons[i].equals(o)) {
                     pressed = switch (i) {
                         case 0 -> "triple";
                         case 1 -> "quad";
@@ -291,10 +283,10 @@ class GUI {
         }
         reroll.addActionListener(buttonListener);
         for (int i = 0; i < 6; i++) {
-            singlesCategoryNames[i].addActionListener(buttonListener);
+            singlesCategoryButtons[i].addActionListener(buttonListener);
         }
         for (int i = 0; i < 7; i++) {
-            combosCategoryNames[i].addActionListener(buttonListener);
+            combosCategoryButtons[i].addActionListener(buttonListener);
         }
         feedbackText.addActionListener(buttonListener);
     }
@@ -310,29 +302,29 @@ class GUI {
 
         int[] sectionData = player.getSingles();
         for (int i = 0; i < 6; i++) {
-            String currentText = singlesCategoryInitialNames[i];
+            String currentText = singlesCategoryNames[i];
             if (sectionData[i] == -1) {
-                singlesCategoryNames[i].setText(currentText);
+                singlesCategoryButtons[i].setText(currentText);
             } else {
-                singlesCategoryNames[i].setText(currentText + ": $" + sectionData[i]);
+                singlesCategoryButtons[i].setText(currentText + ": $" + sectionData[i]);
             }
         }
         if (Utils.arraySum(sectionData) >= 63) {
-            singlesCategoryNames[6].setText("Bonus: ✓");
+            singlesCategoryButtons[6].setText("Bonus: ✓");
         }
-        singlesCategoryNames[8].setText("Singles Total: " + player.getSinglesTotal());
+        singlesCategoryButtons[8].setText("Singles Total: $" + player.getSinglesTotal());
 
         sectionData = player.getCombos();
         for (int i = 0; i < 7; i++) {
-            String currentText = combosCategoryInitialNames[i];
+            String currentText = combosCategoryNames[i];
             if (sectionData[i] == -1) {
-                combosCategoryNames[i].setText(currentText);
+                combosCategoryButtons[i].setText(currentText);
             } else {
-                combosCategoryNames[i].setText(currentText + ": $" + sectionData[i]);
+                combosCategoryButtons[i].setText(currentText + ": $" + sectionData[i]);
             }
         }
-        combosCategoryNames[7].setText("Jackpot Bonus: " + player.getJackpotBonus() * 100);
-        combosCategoryNames[8].setText("Combos Total: " + player.getCombosTotal());
+        combosCategoryButtons[7].setText("Jackpot Bonus: " + player.getJackpotBonus() * 100);
+        combosCategoryButtons[8].setText("Combos Total: $" + player.getCombosTotal());
 
         totalMoney.setText("Total Money: $" + player.getTotalScore());
     }
@@ -372,6 +364,50 @@ class GUI {
 
     void setFeedbackText(String text) {
         feedbackText.setText(text);
+    }
+
+    void setupEndScreen(Player[] players) {
+        frame.setSize(250, 150 + players.length * 40);
+        screen.removeAll();
+        screen.repaint();
+
+        screen.add(Box.createVerticalStrut(10));
+
+        JButton title = new JButton("Scores");
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        screen.add(title);
+
+        screen.add(Box.createVerticalStrut(30));
+
+        for (int i = 0; i < numberOfPlayers; i++) {
+            Container playerScore = new Container();
+            playerScore.setLayout(new BoxLayout(playerScore, BoxLayout.X_AXIS));
+
+            JButton name = new JButton("Player #" + (i + 1));
+            playerScore.add(name);
+
+            playerScore.add(Box.createHorizontalStrut(10));
+
+            JButton score = new JButton("$" + players[i].getTotalScore());
+            playerScore.add(score);
+
+            screen.add(playerScore);
+            screen.add(Box.createVerticalStrut(10));
+        }
+
+        JButton end = new JButton("Press to exit game");
+        end.setAlignmentX(Component.CENTER_ALIGNMENT);
+        screen.add(end);
+
+        screen.add(Box.createVerticalStrut(10));
+
+        end.addActionListener(e -> {
+            if (e.getSource().equals(end)) {
+                frame.dispose();
+            }
+        });
+
+        screen.revalidate();
     }
 
 }

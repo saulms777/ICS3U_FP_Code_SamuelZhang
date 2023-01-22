@@ -36,6 +36,9 @@ class Game {
 
         // run playable game
         run();
+
+        // show end screen
+        gui.setupEndScreen(players);
     }
 
     /**
@@ -56,18 +59,23 @@ class Game {
                 runDice();
                 runCategorySelect();
 
-                // wait for player to start next turn
+                // wait for player to start next turn/round
                 if (currentPlayer != players.length - 1) {
                     waitNext("Press for next player's turn");
-                    currentPlayer++;
                 }
+                currentPlayer++;
             }
 
             // wait for player to start next round
-            waitNext("Press for next round");
-            currentPlayer = 0;
+            if (round != 13) {
+                waitNext("Press for next round");
+                currentPlayer = 0;
+            }
             round++;
         }
+
+        // wait for player to end game
+        waitNext("Press to finish game");
     }
 
     /**
