@@ -43,6 +43,9 @@ class GUI {
         frame.setVisible(true);
     }
 
+    /**
+     * Sets up GUI for start screen.
+     */
     private void setupStartGUI() {
         // sets up the GUI frame
         frame = new JFrame();
